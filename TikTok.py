@@ -109,6 +109,41 @@ def get_user_info(identifier, by_id=False):
                 
                 social_links.append(f"Link: {link_text} - {target_decoded}")
         
+        # METHOD 4: Extract bioLink links from JSON
+        bio_link_pattern = r'"bioLink":{"link":"([^"]+)","risk":(\d+)}'
+        bio_links_matches = re.findall(bio_link_pattern, html_content)
+
+        for link, risk in bio_links_matches:
+            # Clean escape characters in URLs
+            clean_link = link.replace('\\u002F', '/')
+            if not any(clean_link in s for s in social_links):
+                social_links.append(f"💎 **{clean_link}**: `{clean_link}`")
+
+        # Also search for links in other JSON data patterns
+        shared_links_pattern = r'"shareUrl":"([^"]+)"'
+        shared_links_matches = re.findall(shared_links_pattern, html_content)
+
+        for shared_url in shared_links_matches:
+            # Clean escape characters in URLs
+            clean_url = shared_url.replace('\\u002F', '/')
+            if not any(clean_url in s for s in social_links):
+                social_links.append(f"💎 **{clean_url}**: `{clean_url}`")
+
+        # Also search within divs containing DivShareLinks to ensure we capture all links
+        share_links_div_pattern = re.compile(r'<div[^>]*class="[^"]*DivShareLinks[^"]*"[^>]*>(.*?)</div>', re.DOTALL)
+        for div_match in share_links_div_pattern.finditer(html_content):
+            div_content = div_match.group(1)
+            
+            # Search for links inside these divs
+            div_links = re.finditer(r'<a[^>]*href="[^"]*scene=bio_url[^"]*target=([^"&]+)"[^>]*>.*?<span[^>]*class="[^"]*SpanLink[^"]*">([^<]+)</span>', div_content, re.DOTALL)
+            
+            for link_match in div_links:
+                target = urllib.parse.unquote(link_match.group(1))
+                link_text = link_match.group(2)
+                
+                if not any(target in s or link_text in s for s in social_links):
+                    social_links.append(f"💎 **{link_text}**: `{target}`")
+        
         # Find spans with SpanLink class
         span_matches = re.findall(r'<span[^>]*class="[^"]*SpanLink[^"]*">([^<]+)</span>', html_content)
         for span_text in span_matches:
