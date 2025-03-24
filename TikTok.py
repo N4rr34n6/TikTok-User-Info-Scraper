@@ -109,11 +109,6 @@ def get_user_info(identifier, by_id=False):
                 
                 social_links.append(f"Link: {link_text} - {target_decoded}")
         
-        # METHOD 4: Look for specific patterns like lucasio.store and gandul.ro
-        for special_link in ["Lucasio.store", "www.gandul.ro"]:
-            if special_link in html_content and not any(special_link in s for s in social_links):
-                social_links.append(f"Link: {special_link} - {special_link}")
-        
         # Find spans with SpanLink class
         span_matches = re.findall(r'<span[^>]*class="[^"]*SpanLink[^"]*">([^<]+)</span>', html_content)
         for span_text in span_matches:
