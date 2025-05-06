@@ -44,7 +44,7 @@ def get_user_info(identifier, by_id=False):
             'secUid': r'"secUid":"(.*?)"',
             'commentSetting': r'"commentSetting":(\d+)',
             'privateAccount': r'"privateAccount":(true|false)',
-            'region': r'"region":"(.*?)"',
+            'region': r'"ttSeller":false,"region":"([^"]*)"',
             'heart': r'"heart":(\d+)',
             'diggCount': r'"diggCount":(\d+)',
             'friendCount': r'"friendCount":(\d+)',
